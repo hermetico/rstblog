@@ -17,35 +17,47 @@
 """
 import jinja2
 
-@jinja2.contextfunction
-def get_disqus(context):
-    var_shortname=context['builder'].config.root_get('modules.disqus.shortname', 'YOUR-DISQUS-SHORTNAME')
-
-    var_developer=''
-    if context['builder'].config.root_get('modules.disqus.developer', False):
-        var_developer='var disqus_developer = 1;'
-    
-    disqus_txt="""
+disqus_txt = """
 <div id="disqus_thread"></div>
-<script type="text/javascript">
-    var disqus_shortname = '%s'; // required: replace example with your forum shortname
-    %s
-    
-    /* * * DON'T EDIT BELOW THIS LINE * * */
-    (function() {
-        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-    })();
-</script>
-<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
-""" % ( var_shortname, var_developer, )
+<script>
 
-    if not context['config'].get('disqus', True):
-        disqus_txt='' # "<h1>DISQUS DEFEATED</h1>"
-        
-    return jinja2.Markup(disqus_txt.encode('utf-8'))
+var title = document.title.split('-');
+title = title[title.length - 1].trim();
+
+var disqus_config = function () {
+    this.page.url = document.location.origin + document.location.pathname;
+    this.page.identifier = '%(identifier)s';
+    this.page.title = '%(title)s';
+};
+
+var shortname = '%(short_name)s';
+
+var disqus_developer = %(developer)i;
+(function() {
+var d = document, s = d.createElement('script');
+s.src = '//' + shortname + '.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+"""
+
+
+@jinja2.contextfunction
+def get_disqus(context, title, identifier):
+
+    # when module enabled, it is shown by default unless its requested not to within the header with ->  discus: no
+    if context['config'].get('disqus', True):
+        short_name = context['builder'].config.root_get('modules.disqus.shortname', 'YOUR-DISQUS-SHORTNAME')
+        developer = context['builder'].config.root_get('modules.disqus.developer', 0)
+
+        response = disqus_txt % dict(title=title, identifier=identifier, short_name=short_name, developer=developer)
+    else:
+        response = ''
+
+    return jinja2.Markup(response.encode('utf-8'))
 
 
 def setup(builder):

@@ -105,7 +105,7 @@ def get_recent_blog_entries(context, limit=10):
     return get_all_entries(context['builder'])[:limit]
 
 
-def write_index_page(builder):
+def write_blog_page(builder):
     use_pagination = builder.config.root_get('modules.blog.use_pagination', True)
     per_page = builder.config.root_get('modules.blog.per_page', 10)
     entries = get_all_entries(builder)
@@ -164,7 +164,7 @@ def write_feed(builder):
 
 
 def write_blog_files(builder):
-    write_index_page(builder)
+    write_blog_page(builder)
     write_archive_pages(builder)
     write_feed(builder)
 
@@ -173,17 +173,17 @@ def setup(builder):
     after_file_published.connect(process_blog_entry)
     before_build_finished.connect(write_blog_files)
     builder.register_url('blog_index', config_key='modules.blog.index_url',
-                         config_default='/', defaults={'page': 1})
+                         config_default='/blog/', defaults={'page': 1})
     builder.register_url('blog_index', config_key='modules.blog.paged_index_url',
-                         config_default='/page/<page>/')
+                         config_default='/blog/page/<page>/')
     builder.register_url('blog_archive', config_key='modules.blog.archive_url',
-                         config_default='/archive/')
+                         config_default='/blog/archive/')
     builder.register_url('blog_archive',
                          config_key='modules.blog.year_archive_url',
-                         config_default='/<year>/')
+                         config_default='/blog/archive/<year>/')
     builder.register_url('blog_archive',
                          config_key='modules.blog.month_archive_url',
-                         config_default='/<year>/<month>/')
+                         config_default='/blog/archive/<year>/<month>/')
     builder.register_url('blog_feed', config_key='modules.blog.feed_url',
                          config_default='/feed.atom')
     builder.jinja_env.globals.update(

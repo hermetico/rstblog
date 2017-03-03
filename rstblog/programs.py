@@ -77,7 +77,7 @@ class TemplatedProgram(Program):
 
 class RSTProgram(TemplatedProgram):
     """A program that renders an rst file into a template"""
-    default_template = 'rst_display.html'
+    default_template = 'blog/entry.html'
     _fragment_cache = None
 
     def prepare(self):
@@ -96,6 +96,8 @@ class RSTProgram(TemplatedProgram):
                 raise ValueError('expected dict config in file "%s", got: %.40r' \
                     % (self.context.source_filename, cfg))
             self.context.config = self.context.config.add_from_dict(cfg)
+            blog_folder = 'blog' if cfg.get('blog_folder') else ''
+
             self.context.destination_filename = cfg.get(
                 'destination_filename',
                 self.context.destination_filename)
@@ -116,8 +118,17 @@ class RSTProgram(TemplatedProgram):
             if summary_override is not None:
                 self.context.summary = summary_override
 
+            image = cfg.get('image', None)
+
+            self.context.short_title = cfg.get('short_title', None)
+            self.context.profile_page = cfg.get('profile_page', False)
+
         if title is not None:
             self.context.title = title
+
+        if image is not None:
+            self.context.image = image
+
 
     def parse_text_title(self, f):
         buffer = []

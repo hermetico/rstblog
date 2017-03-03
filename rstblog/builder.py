@@ -8,6 +8,7 @@
     :copyright: (c) 2010 by Armin Ronacher.
     :license: BSD, see LICENSE for more details.
 """
+import datetime
 import re
 import os
 import posixpath
@@ -52,6 +53,9 @@ class Context(object):
         self.source_filename = source_filename
         self.links = []
         self.program_name = self.config.get('program')
+        self.image = None
+        self.short_title = None
+        self.profile_page = False
         if self.program_name is None:
             self.program_name = self.builder.guess_program(
                 config, source_filename)
@@ -138,11 +142,14 @@ class Context(object):
         parts = publish_parts(source=contents,
                               writer_name='html4css1',
                               settings_overrides=settings)
-        return {
+        result = {
             'title':        Markup(parts['title']).striptags(),
             'html_title':   Markup(parts['html_title']),
             'fragment':     Markup(parts['fragment'])
         }
+        if self.image is not None:
+            result['image'] = self.image
+        return result
 
     def render_contents(self):
         return self.program.render_contents()
@@ -292,6 +299,8 @@ class Builder(object):
             context = {}
         context['builder'] = self
         context.setdefault('config', self.config)
+
+        context['year'] = datetime.datetime.utcnow().year
         tmpl = self.jinja_env.get_template(template_name)
         before_template_rendered.send(tmpl, context=context)
         return tmpl.render(context)

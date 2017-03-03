@@ -112,9 +112,9 @@ def setup(builder):
     after_file_published.connect(remember_tags)
     before_build_finished.connect(write_tag_files)
     builder.register_url('tag', config_key='modules.tags.tag_url',
-                         config_default='/tags/<tag>/')
+                         config_default='/blog/tags/<tag>/')
     builder.register_url('tagfeed', config_key='modules.tags.tag_feed_url',
-                         config_default='/tags/<tag>/feed.atom')
+                         config_default='/blog/tags/<tag>/feed.atom')
     builder.register_url('tagcloud', config_key='modules.tags.cloud_url',
-                         config_default='/tags/')
+                         config_default='/blog/tags/')
     builder.jinja_env.globals['get_tags'] = get_tags
